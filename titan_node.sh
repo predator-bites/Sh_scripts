@@ -16,7 +16,6 @@ if ! command -v curl &> /dev/null; then
 fi
 
 # Отображение логотипа
-curl -s https://raw.githubusercontent.com/noxuspace/cryptofortochka/main/logo_club.sh | bash
 
 # Меню
 echo -e "${YELLOW}Выберите действие:${NC}"
