@@ -18,7 +18,7 @@ echo -e "${YELLOW}Please enter your identity code:${NC}"
 read -p "> " id
 
 # Storage and port settings
-storage_gb=50
+storage_gb=5
 start_port=1235
 container_count=50
 
