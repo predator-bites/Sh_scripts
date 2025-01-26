@@ -40,6 +40,18 @@ print_progress() {
     echo -e "  ${BLUE}→${NC} $1 ${GREEN}[$2%]${NC}"
 }
 
+generate_node_name() {
+    local base_name="titannode"
+    local counter=1
+
+    # Check existing Docker containers and increment the counter
+    while docker ps -a --format '{{.Names}}' | grep -qw "${base_name}_${counter}"; do
+        counter=$((counter + 1))
+    done
+
+    echo "${base_name}_${counter}"
+}
+
 install_docker() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
@@ -120,16 +132,22 @@ print_msg "Installing Titan Edge..."
 print_progress "Pulling Docker image..." "25"
 docker pull nezha123/titan-edge >/dev/null 2>&1 || print_error "Failed to pull Docker image"
 
+NODE_NAME=$(generate_node_name)
+print_msg "Generated node name: ${NODE_NAME}"
+
 print_progress "Creating directory and starting container..." "50"
-mkdir -p ~/.titanedge
-docker run --network=host -d -v "[~/.titanedge]:/root/.titanedge" nezha123/titan-edge >/dev/null 2>&1 || print_error "Failed to start container"
+mkdir -p ~/.titanedge || print_error "Failed to create directory ~/.titanedge"
+chmod 755 ~/.titanedge || print_error "Failed to set permissions for ~/.titanedge"
 
-print_progress "Binding device..." "75"
-docker run --rm -it -v "[~/.titanedge]:/root/.titanedge" nezha123/titan-edge bind --hash="$HASH" "$API_URL"
+# Use the generated node name in the container
+print_progress "Starting container with name ${NODE_NAME}..." "75"
+docker run --name "${NODE_NAME}" --network=host -d \
+  -v "$(realpath ~/.titanedge):/root/.titanedge" \
+  nezha123/titan-edge >/dev/null 2>&1 || print_error "Failed to start container"
 
-if [ $? -eq 0 ]; then
-    echo
-    print_success "Installation complete! Titan Edge is now running. [100%]"
-else
-    print_error "Installation failed. Please check your hash and try again."
-fi
+print_progress "Binding device..." "90"
+docker run --rm -it \
+  -v "$(realpath ~/.titanedge):/root/.titanedge" \
+  nezha123/titan-edge bind --hash="$HASH" "$API_URL" || print_error "Failed to bind device. Check hash and try again."
+
+print_success "Installation complete! Titan Edge is now running as ${NODE_NAME}. [100%]"
