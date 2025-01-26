@@ -1,160 +1,135 @@
 #!/bin/bash
 
-# Function to display colored text
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+RED='\033[0;31m'
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Check if the script is run as root
-if [ "$(id -u)" != "0" ]; then
-    echo -e "${YELLOW}This script requires root access.${NC}"
-    echo -e "${YELLOW}Please enter root mode using 'sudo -i', then rerun this script.${NC}"
-    exec sudo -i
-    exit 1
-fi
-
-# Prompt the user to enter the identity code
-echo -e "${YELLOW}Please enter your identity code:${NC}"
-read -p "> " id
-
-# Storage and port settings
-storage_gb=5
-start_port=1235
-container_count=50
-
-# Get the list of public IPs
-public_ips=$(curl -s ifconfig.me)
-
-if [ -z "$public_ips" ]; then
-    echo -e "${YELLOW}No public IP detected.${NC}"
-    exit 1
-fi
-
-# Define a function to update sysctl configuration
-update_sysctl_config() {
-    # Define the configuration values
-    local CONFIG_VALUES="
-net.core.rmem_max=26214400
-net.core.rmem_default=26214400
-net.core.wmem_max=26214400
-net.core.wmem_default=26214400
-"
-
-    # Path to the sysctl configuration file
-    local SYSCTL_CONF="/etc/sysctl.conf"
-
-    # Backup the original sysctl.conf file
-    echo "Backing up the original sysctl.conf to sysctl.conf.bak..."
-    sudo cp "$SYSCTL_CONF" "$SYSCTL_CONF.bak"
-
-    # Append the configuration values to sysctl.conf
-    echo "Updating sysctl.conf with new configuration values..."
-    echo "$CONFIG_VALUES" | sudo tee -a "$SYSCTL_CONF" > /dev/null
-
-    # Apply the changes
-    echo "Applying the new sysctl configuration..."
-    sudo sysctl -p
-
-    echo "Configuration updated and applied successfully."
-
-    # Check if SELinux is present and handle accordingly
-    if command -v setenforce &> /dev/null; then
-        echo "Disabling SELinux enforcement..."
-        sudo setenforce 0
-    else
-        echo "SELinux is not installed or not applicable."
-    fi
+print_banner() {
+    clear
+    echo -e "${CYAN}"
+    echo "  _______ _ _                 ______    _"            
+    echo " |__   __(_) |               |  ____|  | |"           
+    echo "    | |   _| |_ __ _ _ __    | |__   __| | __ _  ___" 
+    echo "    | |  | | __/ _\` | '_ \   |  __| / _\` |/ _\` |/ _ \\"
+    echo "    | |  | | || (_| | | | |  | |___| (_| | (_| |  __/"
+    echo "    |_|  |_|\__\__,_|_| |_|  |______\__,_|\__, |\___|"
+    echo "                                            __/ |"     
+    echo "                                           |___/"      
+    echo
+    echo "                Titan Edge Installer v1.0"
+    echo "                Author: Galkurta"
+    echo -e "${NC}\n"
 }
 
-# Function to install Docker based on the distribution
+print_msg() {
+    echo -e "  ${BLUE}→${NC} $1"
+}
+
+print_success() {
+    echo -e "  ${GREEN}✓${NC} $1"
+}
+
+print_error() {
+    echo -e "  ${RED}×${NC} $1"
+    exit 1
+}
+
+print_progress() {
+    echo -e "  ${BLUE}→${NC} $1 ${GREEN}[$2%]${NC}"
+}
+
 install_docker() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
-        case "$ID" in
-            ubuntu|debian)
-                echo -e "${GREEN}Installing Docker on $ID...${NC}"
-                apt-get update
-                apt-get install -y ca-certificates curl gnupg lsb-release
-                apt-get install -y docker.io
-                ;;
-            centos|rhel|almalinux|rocky)
-                echo -e "${GREEN}Installing Docker on $ID...${NC}"
-                yum install -y yum-utils
-                yum install -y docker
-                update_sysctl_config
-                ;;
-            fedora)
-                echo -e "${GREEN}Installing Docker on Fedora...${NC}"
-                dnf install -y docker
-                update_sysctl_config
-                ;;
-            arch)
-                echo -e "${GREEN}Installing Docker on Arch Linux...${NC}"
-                pacman -S --noconfirm docker
-                ;;
-            *)
-                echo -e "${YELLOW}Unsupported Linux distribution: $ID. Please install Docker manually.${NC}"
-                exit 1
-                ;;
-        esac
+        OS=$NAME
     else
-        echo -e "${YELLOW}Cannot detect Linux distribution. Please install Docker manually.${NC}"
-        exit 1
+        print_error "Cannot detect OS"
     fi
+
+    case $OS in
+        *"Ubuntu"*|*"Debian"*)
+            print_progress "Updating package list..." "20"
+            sudo apt-get update >/dev/null 2>&1
+            
+            print_progress "Installing prerequisites..." "40"
+            sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release >/dev/null 2>&1
+            
+            print_progress "Adding Docker repository..." "60"
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg >/dev/null 2>&1
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            
+            print_progress "Installing Docker..." "80"
+            sudo apt-get update >/dev/null 2>&1
+            sudo apt-get install -y docker-ce docker-ce-cli containerd.io >/dev/null 2>&1
+            ;;
+        *"CentOS"*|*"Red Hat"*|*"Fedora"*)
+            print_progress "Installing prerequisites..." "25"
+            sudo yum install -y yum-utils >/dev/null 2>&1
+            
+            print_progress "Adding Docker repository..." "50"
+            sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo >/dev/null 2>&1
+            
+            print_progress "Installing Docker..." "75"
+            sudo yum install -y docker-ce docker-ce-cli containerd.io >/dev/null 2>&1
+            ;;
+        *)
+            print_error "Unsupported operating system: $OS"
+            ;;
+    esac
+
+    print_progress "Starting Docker service..." "90"
+    sudo systemctl start docker >/dev/null 2>&1
+    sudo systemctl enable docker >/dev/null 2>&1
+    sudo usermod -aG docker $USER >/dev/null 2>&1
+    
+    print_success "Docker installation completed [100%]"
+    echo
 }
 
-# Check if Docker is installed
-if ! command -v docker &> /dev/null; then
-    echo -e "${GREEN}Docker not detected, installing...${NC}"
-    install_docker
-else
-    echo -e "${GREEN}Docker is already installed.${NC}"
+print_banner
+
+if [ "$EUID" -ne 0 ]; then
+    print_error "Please run with sudo privileges"
 fi
 
-# Ensure Docker is running
-systemctl start docker
-systemctl enable docker
+echo -e "  ${BLUE}Checking system requirements...${NC}"
+if ! command -v docker &> /dev/null; then
+    print_msg "Docker not found. Starting installation..."
+    echo
+    install_docker
+else
+    print_success "Docker already installed"
+    echo
+fi
 
-# Pull the Docker image
-echo -e "${GREEN}Pulling the Docker image nezha123/titan-edge...${NC}"
-docker pull nezha123/titan-edge
-
-# Set up nodes for each public IP
-current_port=$start_port
-
-for ip in $public_ips; do
-    echo -e "${GREEN}Setting up node for IP $ip${NC}"
-
-    for ((i=1; i<=container_count; i++)); do
-        storage_path="/root/titan_storage_${ip}_${i}"
-
-        # Ensure storage path exists
-        sudo mkdir -p "$storage_path"
-        sudo chmod -R 777 "$storage_path"
-
-        # Run the container with restart always policy
-        container_id=$(docker run -d --restart always -v "$storage_path:/root/.titanedge/storage" --name "titan_${ip}_${i}" --net=host nezha123/titan-edge)
-
-        echo -e "${GREEN}Node titan_${ip}_${i} is running with container ID $container_id${NC}"
-
-        sleep 30
-
-        # Modify the config.toml file to set StorageGB and RPC port
-        docker exec $container_id bash -c "\
-            sed -i 's/^[[:space:]]*#StorageGB = .*/StorageGB = $storage_gb/' /root/.titanedge/config.toml && \
-            sed -i 's/^[[:space:]]*#ListenAddress = \"0.0.0.0:1234\"/ListenAddress = \"0.0.0.0:$current_port\"/' /root/.titanedge/config.toml && \
-            echo 'Storage for node titan_${ip}_${i} set to $storage_gb GB, Port set to $current_port'"
-
-        # Restart the container for the settings to take effect
-        docker restart $container_id
-
-        # Bind the node
-        docker exec $container_id bash -c "\
-            titan-edge bind --hash=$id https://api-test1.container1.titannet.io/api/v2/device/binding"
-        echo -e "${GREEN}Node titan_${ip}_${i} has been successfully initialized.${NC}"
-
-        current_port=$((current_port + 1))
-    done
+while true; do
+    echo -en "  ${BLUE}Enter your hash:${NC} "
+    read HASH
+    if [ ! -z "$HASH" ]; then
+        break
+    fi
+    print_msg "Hash cannot be empty"
 done
 
-echo -e "${GREEN}============================== All nodes have been set up and are running ===============================${NC}"
+API_URL="https://api-test1.container1.titannet.io/api/v2/device/binding"
+
+print_msg "Installing Titan Edge..."
+
+print_progress "Pulling Docker image..." "25"
+docker pull nezha123/titan-edge >/dev/null 2>&1 || print_error "Failed to pull Docker image"
+
+print_progress "Creating directory and starting container..." "50"
+mkdir -p ~/.titanedge
+docker run --network=host -d -v "[~/.titanedge]:/root/.titanedge" nezha123/titan-edge >/dev/null 2>&1 || print_error "Failed to start container"
+
+print_progress "Binding device..." "75"
+docker run --rm -it -v "[~/.titanedge]:/root/.titanedge" nezha123/titan-edge bind --hash="$HASH" "$API_URL"
+
+if [ $? -eq 0 ]; then
+    echo
+    print_success "Installation complete! Titan Edge is now running. [100%]"
+else
+    print_error "Installation failed. Please check your hash and try again."
+fi
