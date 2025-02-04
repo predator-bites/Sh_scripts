@@ -1,13 +1,16 @@
 #!/bin/bash
 
-# Step 1: Get Node ID
+# Step 1: Get Node ID and clean unwanted characters
 NODE_INFO=$(gaianet info --base "$HOME/gaianet-2")
-NODE_ID=$(echo "$NODE_INFO" | grep 'Node ID:' | awk '{print $3}')
+NODE_ID=$(echo "$NODE_INFO" | grep 'Node ID:' | awk '{print $3}' | tr -d '\r\n')
+
+# Remove unwanted escape sequences like ^[[0m and trailing characters like >
+NODE_ID=$(echo "$NODE_ID" | sed 's/\x1B\[[0-9;]*[a-zA-Z]//g' | sed 's/>$//' | sed 's/[^a-fA-F0-9x]//g')
 
 # Step 2: Delete the existing Python script if it exists
 rm -rf random_chat_with_faker_2.py
 
-# Step 3: Create a new Python script with the Node ID
+# Step 3: Create a new Python script with the cleaned Node ID
 cat <<EOF > random_chat_with_faker_2.py
 import requests
 import random
@@ -76,4 +79,4 @@ fi
 # Step 5: Run the script in a new screen session
 screen -dmS faker_session_2 python3 random_chat_with_faker_2.py
 
-echo "Script has been updated and is now running in a new screen session: faker_session_2"
+echo "Script updated and running in a new screen session: faker_session_2"
