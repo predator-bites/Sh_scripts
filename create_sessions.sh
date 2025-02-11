@@ -107,11 +107,11 @@ for ((i = 1; i <= NUM_SESSIONS; i++))
 
 do
   SESSION_NAME="chat_session_$i"
-  sleep 30
-  echo "Creating screen session: $SESSION_NAME"
+  sleep 30 &&
+  echo "Creating screen session: $SESSION_NAME" &&
 
   # Start a detached screen session running the Python script
-  screen -dmS "$SESSION_NAME" bash -c "python3 $SCRIPT_PATH $DOMAIN"
+  screen -dmS "$SESSION_NAME" bash -c "python3 $SCRIPT_PATH $DOMAIN" &&
 done
 
 echo "All $NUM_SESSIONS screen sessions have been created."
