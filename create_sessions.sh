@@ -111,7 +111,7 @@ do
   echo "Creating screen session: $SESSION_NAME" &&
 
   # Start a detached screen session running the Python script
-  screen -dmS "$SESSION_NAME" bash -c "python3 $SCRIPT_PATH $DOMAIN" &&
+  screen -dmS "$SESSION_NAME" bash -c "python3 $SCRIPT_PATH $DOMAIN" 
 done
 
 echo "All $NUM_SESSIONS screen sessions have been created."
