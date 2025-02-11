@@ -104,9 +104,10 @@ fi
 
 # Create the specified number of screen sessions
 for ((i = 1; i <= NUM_SESSIONS; i++))
-sleep 30
+
 do
   SESSION_NAME="chat_session_$i"
+  sleep 30
   echo "Creating screen session: $SESSION_NAME"
 
   # Start a detached screen session running the Python script
