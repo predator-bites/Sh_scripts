@@ -26,19 +26,25 @@ echo -e "${NEON_RED}Welcome to DP Script!${RESET}"
 sudo apt update
 
 # Установка необходимых зависимостей
-sudo apt install -y pkg-config libssl-dev build-essential nano
-
+sudo apt install -y pkg-config libssl-dev build-essential nano cargo
+sudo apt install -y tmux nano build-essential pkg-config libssl-dev git-all unzip
 # Установка Rust
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-export PATH="$HOME/.cargo/bin:$PATH"
-echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+source $HOME/.cargo/env && \
+cargo --version && \
+rustup target add riscv32i-unknown-none-elf && \
+sudo apt remove -y protobuf-compiler && \
+curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v25.2/protoc-25.2-linux-x86_64.zip && \
+unzip protoc-25.2-linux-x86_64.zip -d $HOME/.local && \
+export PATH="$HOME/.local/bin:$PATH" && \
 
+sleep 10
 # Установка Nexus
 curl https://cli.nexus.xyz/ | sh
 
 
-echo "Откройте файл ~/.nexus/prover-id и добавьте ваш prover-id."
-
 
 echo "Установка завершена. Если нода не запрашивала prover-id, откройте файл ~/.nexus/prover-id и добавьте его вручную."
+echo "После используйте команду, для запуска скрипта:"
+echo "curl https://cli.nexus.xyz/ | sh"
+
