@@ -25,8 +25,8 @@ echo -e "${NEON_RED}Welcome to DP Script!${RESET}"
 # Обновление пакетов
 sudo apt update
 
-rm -rf .local/bin/protoc
-rm -rf .nexus
+rm -rf .local
+
 sleep 5
 
 # Установка необходимых зависимостей
