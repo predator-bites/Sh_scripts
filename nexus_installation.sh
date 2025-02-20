@@ -38,7 +38,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 sleep 10
 # Установка Nexus
-screen -dmS nexus bash -c ""
+screen -dmS nexus bash -c "curl https://cli.nexus.xyz/ | sh"
 
 echo "Для дальнейшей установки используйте следующую команду"
 echo "screen -r nexus"
