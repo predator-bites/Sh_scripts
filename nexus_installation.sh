@@ -27,6 +27,7 @@ sudo apt update
 
 rm -rf .local/bin/protoc
 rm -rf .nexus
+sleep 5
 
 # Установка необходимых зависимостей
 sudo apt update && sudo apt upgrade -y && \
