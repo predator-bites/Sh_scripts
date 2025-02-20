@@ -7,11 +7,11 @@ RESET='\033[0m'
 # Логотип
 logo() {
     echo -e "
-${NEON_RED}  ____   ${NEON_BLUE}____  
-${NEON_RED} |  _ \\  ${NEON_BLUE}|  _ \\ 
-${NEON_RED} | | | | ${NEON_BLUE}| |_) |
-${NEON_RED} | |_| | ${NEON_BLUE}|  __/ 
-${NEON_RED} |____/  ${NEON_BLUE}|_|    
+  ____   ${NEON_BLUE}____  
+ |  _ \\  ${NEON_BLUE}|  _ \\ 
+ | | | | ${NEON_BLUE}| |_) |
+ | |_| | ${NEON_BLUE}|  __/ 
+ |____/  ${NEON_BLUE}|_|    
 ${RESET}
 "
 }
@@ -46,10 +46,10 @@ screen -dmS nexus bash -c "curl https://cli.nexus.xyz/ | sh"
 
 
 echo " "
-echo "Для дальнейшей установки используйте следующую команду"
+echo -e ${NEON_BLUE}"Для дальнейшей установки используйте следующую команду"
 echo "screen -r nexus"
 echo " "
-echo "Как всё заработает, используйте сочитание клавишь CNTR + A, D, чтобы выйти из сессии"
+echo -e ${NEON_BLUE}"Как всё заработает, используйте сочитание клавишь CNTR + A, D, чтобы выйти из сессии"
 
 echo "Подписуйтесь на канал автора скрипта - t.me/DropPredator "
 
