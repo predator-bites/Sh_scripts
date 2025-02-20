@@ -38,13 +38,12 @@ export PATH="$HOME/.local/bin:$PATH"
 
 sleep 10
 # Установка Nexus
-screen -dmS nexus
+screen -dmS nexus bash -c ""
 
 echo "Для дальнейшей установки используйте следующую команду"
 echo "screen -r nexus"
 
+echo "Как зафиксируете, что всё работает используйте сочитание клавишь CNRT + A, D
 
-
-echo "Установка завершена."
 echo "Подписуйтесь на канал автора скрипта - t.me/DropPredator "
 
