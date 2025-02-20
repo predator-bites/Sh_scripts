@@ -26,6 +26,7 @@ echo -e "${NEON_RED}Welcome to DP Script!${RESET}"
 sudo apt update
 
 rm -rf .local
+rm -rf .nexus
 
 sleep 5
 
