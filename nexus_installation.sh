@@ -26,6 +26,8 @@ echo -e "${NEON_RED}Welcome to DP Script!${RESET}"
 sudo apt update
 
 rm -rf .local/bin/protoc
+rm -rf .nexus
+
 # Установка необходимых зависимостей
 sudo apt update && sudo apt upgrade -y && \
 sudo apt install -y tmux nano build-essential pkg-config libssl-dev git-all unzip && \
