@@ -25,6 +25,7 @@ echo -e "${NEON_RED}Welcome to DP Script!${RESET}"
 # Обновление пакетов
 sudo apt update
 
+rm -rf .local/bin/protoc
 # Установка необходимых зависимостей
 sudo apt update && sudo apt upgrade -y && \
 sudo apt install -y tmux nano build-essential pkg-config libssl-dev git-all unzip && \
@@ -43,7 +44,7 @@ screen -dmS nexus bash -c "curl https://cli.nexus.xyz/ | sh"
 echo "Для дальнейшей установки используйте следующую команду"
 echo "screen -r nexus"
 
-echo "Как зафиксируете, что всё работает используйте сочитание клавишь CNRT + A, D"
+echo "Как зафиксируете, что всё работает используйте сочитание клавишь CNTR + A, D"
 
 echo "Подписуйтесь на канал автора скрипта - t.me/DropPredator "
 
