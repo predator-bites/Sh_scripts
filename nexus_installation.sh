@@ -2,6 +2,7 @@
 # Цветовые коды
 NEON_RED='\033[38;5;196m'
 NEON_BLUE='\033[38;5;45m'
+BOLD_WHITE='\033[1;37m'
 RESET='\033[0m'
 
 # Логотип
@@ -48,7 +49,7 @@ screen -dmS nexus bash -c "curl https://cli.nexus.xyz/ | sh"
 
 echo " "
 echo -e ${NEON_BLUE}"Для дальнейшей установки используйте следующую команду"
-echo "screen -r nexus"
+echo -e ${BOLD_WHITE}"screen -r nexus"
 echo " "
 echo -e ${NEON_BLUE}"Как всё заработает, используйте сочитание клавишь CNTR + A, D, чтобы выйти из сессии"
 
