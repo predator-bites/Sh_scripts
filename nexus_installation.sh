@@ -6,9 +6,9 @@ RESET='\033[0m'
 
 # Логотип
 logo() {
-    echo -e "
-  ____   ${NEON_BLUE}____  
- |  _ \\  ${NEON_BLUE}|  _ \\ 
+    echo -e "${NEON_BLUE}
+  ____                ____  
+ |  _ \\ ${NEON_BLUE}|  _ \\ 
  | | | | ${NEON_BLUE}| |_) |
  | |_| | ${NEON_BLUE}|  __/ 
  |____/  ${NEON_BLUE}|_|    
